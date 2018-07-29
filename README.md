@@ -28,3 +28,6 @@ docker run -d \
     gliderlabs/registrator:latest \
       -ip 192.168.65.1 \
       consul://192.168.65.1:8500
+
+#### Usage:
+	- curl 127.0.0.1:8500/v1/catalog/services
