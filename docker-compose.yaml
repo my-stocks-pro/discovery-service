@@ -1,0 +1,96 @@
+version: "2"
+
+services:
+
+  consul-master:
+    image:  progrium/consul:latest
+    command: -server -bootstrap-expect 3 -ui-dir /ui
+    container_name: consul-master
+    hostname: consul-master
+    ports:
+      - 8500:8500
+      - 8400:8400
+      - 8600:53/udp
+    restart: always
+
+  consul1:
+    image: progrium/consul:latest
+    container_name: consul1
+    hostname: consul1
+    expose:
+      - 8400
+      - 8500
+      - 8600
+    command: -server -join consul-master
+    depends_on:
+      - consul-master
+    restart: always
+
+  consul2:
+    image: progrium/consul:latest
+    container_name: consul2
+    hostname: consul2
+    expose:
+      - 8400
+      - 8500
+      - 8600
+    command: -server -join consul-master
+    depends_on:
+      - consul-master
+    restart: always
+
+  registrator:
+    image: gliderlabs/registrator:latest
+    command: -ip $HOST consul://$HOST:8500
+    container_name: registrator
+    hostname: $HOST
+    restart: always
+    depends_on:
+      - consul-master
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+
+  api-server:
+    build:
+  container_name: api-server
+
+# go_server:
+#   build: .
+#   container_name: go_server
+#   command: go run main.go
+#   ports:
+#       - "8000:8000"
+#       - "9000:9000"
+#   environment:
+#       - MIGRATE=${MIGRATE}
+#       - PGHOST=${PGHOST}
+#       - PGPORT=${PGPORT}
+#       - PGNAME=${PGNAME}
+#       - PGUSER=${PGUSER}
+#       - PGPASS=${PGPASS}
+#       - RDSHOST=${RDSHOST}
+#       - RDSPORT=${RDSPORT}
+#       - RDSNAME=${RDSNAME}
+#   depends_on:
+#       - redis
+#       - postgres
+#   links:
+#       - postgres
+#       - redis
+
+# postgres:
+#   image: postgres
+#   container_name: postgres
+#   restart: always
+#   environment:
+#       - POSTGRES_USER=${PGUSER}
+#       - POSTGRES_PASSWORD=${PGPASS}
+#       - POSTGRES_DB=${PGNAME}
+
+# redis:
+#   image: redis:3.0-alpine
+#   container_name: redis
+#   restart: always
+#   command: redis-server --appendonly yes
+#   environment:
+#       - ALLOW_EMPTY_PASSWORD=yes

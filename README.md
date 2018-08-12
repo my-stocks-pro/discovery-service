@@ -31,3 +31,8 @@ docker run -d \
 
 #### Usage:
 	- curl 127.0.0.1:8500/v1/catalog/services
+
+
+#### AWS - TERRAFORM
+    terraform apply -var 'access_key=' -var 'secret_key='
+
