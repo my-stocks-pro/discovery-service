@@ -34,5 +34,6 @@ docker run -d \
 
 
 #### AWS - TERRAFORM
+    terraform init
     terraform apply -var 'access_key=' -var 'secret_key='
 
