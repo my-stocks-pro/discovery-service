@@ -1,6 +1,17 @@
 
 
-all: create
+all: env create
+
+env:
+	export MIGRATE='1'
+	export PGHOST='postgres'
+	export PGPORT='5432'
+	export PGNAME='music_room'
+	export PGUSER='alex'
+	export PGPASS='12345'
+	export RDSHOST='redis'
+	export RDSPORT='6379'
+	export RDSNAME='1'
 
 create:
 	docker-compose up --build
