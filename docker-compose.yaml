@@ -50,19 +50,38 @@ services:
 #    volumes:
 #      - /var/run/docker.sock:/tmp/docker.sock
 
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    volumes:
+      - /var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=alex
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=my_stocks_pro
+
+  redis:
+    image: redis:3.0-alpine
+    container_name: redis
+    restart: always
+    command: redis-server --appendonly yes
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
   api-server:
     image: 848984447616.dkr.ecr.us-east-1.amazonaws.com/api-server:latest
     container_name: api-server
-    restart: always
+    #restart: always
     ports:
       - 8000:8000
     environment:
       - MIGRATE=${MIGRATE}
-      - PGHOST=${PGHOST}
-      - PGPORT=${PGPORT}
-      - PGNAME=${PGNAME}
-      - PGUSER=${PGUSER}
-      - PGPASS=${PGPASS}
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGNAME=my_stocks_pro
+      - PGUSER=alex
+      - PGPASS=12345
       - RDSHOST=${RDSHOST}
       - RDSPORT=${RDSPORT}
       - RDSNAME=${RDSNAME}
@@ -74,19 +93,3 @@ services:
       - postgres
       - redis
 
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
-    environment:
-      - POSTGRES_USER=${PGUSER}
-      - POSTGRES_PASSWORD=${PGPASS}
-      - POSTGRES_DB=${PGNAME}
-
-  redis:
-    image: redis:3.0-alpine
-    container_name: redis
-    restart: always
-    command: redis-server --appendonly yes
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
