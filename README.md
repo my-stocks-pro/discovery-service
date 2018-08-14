@@ -37,3 +37,12 @@ docker run -d \
     terraform init
     terraform apply -var 'access_key=' -var 'secret_key='
 
+#### Make
+    - build infrastructure:
+        AKEY='aws_access_key' && AKEY='aws_secret_key' && make terrup
+    - rm infrastructure:
+        AKEY='aws_access_key' && AKEY='aws_secret_key' && make terrdown
+    - build docker-compose:
+        make
+    - rm docker-copmose;
+        make clean
