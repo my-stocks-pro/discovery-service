@@ -1,95 +1,108 @@
-version: "2"
+version: '3.1'
 
 services:
 
-#  consul-master:
-#    image: progrium/consul:latest
-#    command: -server -bootstrap-expect 3 -ui-dir /ui
-#    container_name: consul-master
-#    hostname: consul-master
-#    ports:
-#      - 8500:8500
-#      - 8400:8400
-#      - 8600:53/udp
-#    restart: always
-#
-#  consul1:
-#    image: progrium/consul:latest
-#    container_name: consul1
-#    hostname: consul1
-#    expose:
-#      - 8400
-#      - 8500
-#      - 8600
-#    command: -server -join consul-master
-#    depends_on:
-#      - consul-master
-#    restart: always
-#
-#  consul2:
-#    image: progrium/consul:latest
-#    container_name: consul2
-#    hostname: consul2
-#    expose:
-#      - 8400
-#      - 8500
-#      - 8600
-#    command: -server -join consul-master
-#    depends_on:
-#      - consul-master
-#    restart: always
-#
-#  registrator:
-#    image: gliderlabs/registrator:latest
-#    command: -ip $HOST consul://$HOST:8500
-#    container_name: registrator
-#    hostname: $HOST
-#    restart: always
-#    depends_on:
-#      - consul-master
-#    volumes:
-#      - /var/run/docker.sock:/tmp/docker.sock
+  #  consul-master:
+  #    image: progrium/consul:latest
+  #    command: -server -bootstrap-expect 3 -ui-dir /ui
+  #    container_name: consul-master
+  #    hostname: consul-master
+  #    ports:
+  #      - 8500:8500
+  #      - 8400:8400
+  #      - 8600:53/udp
+  #    restart: always
+  #
+  #  consul1:
+  #    image: progrium/consul:latest
+  #    container_name: consul1
+  #    hostname: consul1
+  #    expose:
+  #      - 8400
+  #      - 8500
+  #      - 8600
+  #    command: -server -join consul-master
+  #    depends_on:
+  #      - consul-master
+  #    restart: always
+  #
+  #  consul2:
+  #    image: progrium/consul:latest
+  #    container_name: consul2
+  #    hostname: consul2
+  #    expose:
+  #      - 8400
+  #      - 8500
+  #      - 8600
+  #    command: -server -join consul-master
+  #    depends_on:
+  #      - consul-master
+  #    restart: always
+  #
+  #  registrator:
+  #    image: gliderlabs/registrator:latest
+  #    command: -ip $HOST consul://$HOST:8500
+  #    container_name: registrator
+  #    hostname: $HOST
+  #    restart: always
+  #    depends_on:
+  #      - consul-master
+  #    volumes:
+  #      - /var/run/docker.sock:/tmp/docker.sock
 
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
-    volumes:
-      - /var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=alex
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_DB=my_stocks_pro
 
-  redis:
-    image: redis:3.0-alpine
-    container_name: redis
-    restart: always
-    command: redis-server --appendonly yes
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
 
   api-server:
     image: 848984447616.dkr.ecr.us-east-1.amazonaws.com/api-server:latest
     container_name: api-server
-    #restart: always
     ports:
       - 8000:8000
+    env_file: .env
     environment:
-      - MIGRATE=${MIGRATE}
-      - PGHOST=postgres
-      - PGPORT=5432
-      - PGNAME=my_stocks_pro
-      - PGUSER=alex
-      - PGPASS=12345
-      - RDSHOST=${RDSHOST}
-      - RDSPORT=${RDSPORT}
-      - RDSNAME=${RDSNAME}
+     - MIGRATE=${MIGRATE}
+     - PGHOST=${PG_HOST}
+     - PGPORT=${PG_PORT}
+     - PGNAME=${PG_NAME}
+     - PGUSER=${PG_USER}
+     - PGPASS=${PG_PASS}
+     - RDSHOST=#{RDSHOST}
+     - RDSPORT=${RDSPORT}
+     - RDSNAME=${RDSNAME}
     depends_on:
-      #- registrator
-      - redis
       - postgres
     links:
       - postgres
-      - redis
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file: .env
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASS}
+      - POSTGRES_DB=${PG_NAME}
+    restart: always
+
+    #healthcheck:
+    #  test: ["CMD-SHELL", "pg_isready -U postgres"]
+    #  interval: 10s
+    #  timeout: 5s
+    #  retries: 5
+    #networks:
+    #- my-stocks-pro-net
+
+#  redis:
+#    image: redis:3.0-alpine
+#    container_name: redis
+#    restart: always
+#    command: redis-server --appendonly yes
+#    environment:
+#    - ALLOW_EMPTY_PASSWORD=yes
+
+
+#networks:
+#  my-stocks-pro-net:
+#    driver: bridge
 
