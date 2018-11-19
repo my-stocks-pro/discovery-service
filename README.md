@@ -22,12 +22,20 @@ docker run -d --name=consul \
 	-ui-dir /ui
 
 #### After this runs, you should see the node in the consul ui
-docker run -d \
+docker run -ti \
     --name=registrator \
     --volume=/var/run/docker.sock:/tmp/docker.sock \
     gliderlabs/registrator:latest \
       -ip 192.168.65.1 \
       consul://192.168.65.1:8500
+ 
+#### NEW flow for start Registrator
+docker run -d \
+	--name=registrator \
+	--net=host \
+	--volume=/var/run/docker.sock:/tmp/docker.sock \
+	gliderlabs/registrator:latest \
+	consul://localhost:8500
 
 #### Usage:
 	- curl 127.0.0.1:8500/v1/catalog/services
